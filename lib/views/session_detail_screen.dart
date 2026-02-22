@@ -113,7 +113,10 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen> {
           if (_query.isNotEmpty)
             Container(
               height: 180,
-              decoration: BoxDecoration(color: Colors.grey.shade100, border: Border(bottom: BorderSide(color: Colors.grey.shade300))),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                border: Border(bottom: BorderSide(color: Theme.of(context).dividerColor)),
+              ),
               child: libraryAsync.when(
                 data: (songs) {
                   final filtered = songs.where((s) => s.title.toLowerCase().contains(_query.toLowerCase()) || s.originalSinger.toLowerCase().contains(_query.toLowerCase())).toList();
@@ -128,10 +131,18 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen> {
                           setState(() { _query = ''; _searchController.clear(); });
                         },
                         title: Row(children: [
-                          Expanded(child: RichText(overflow: TextOverflow.ellipsis, text: TextSpan(style: const TextStyle(color: Colors.black), children: [
-                            TextSpan(text: s.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
-                            TextSpan(text: " - ${s.originalSinger}", style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
-                          ]))),
+                          Expanded(
+                            child: RichText(
+                              overflow: TextOverflow.ellipsis,
+                              text: TextSpan(
+                                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+                                children: [
+                                  TextSpan(text: s.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                                  TextSpan(text: " - ${s.originalSinger}", style: const TextStyle(fontSize: 11, color: Colors.blueGrey)),
+                                ],
+                              ),
+                            ),
+                          ),
                           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
                             Text(s.highestNote, style: TextStyle(color: _getNoteColor(s.highestNote), fontSize: 10, fontWeight: FontWeight.bold)),
                             Text('${s.machineBrand} ${s.songNumber}', style: TextStyle(color: _getBrandColor(s.machineBrand), fontSize: 9, fontWeight: FontWeight.bold)),

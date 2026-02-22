@@ -268,7 +268,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                         child: RichText(
                           overflow: TextOverflow.ellipsis,
                           text: TextSpan(
-                            style: const TextStyle(color: Colors.black),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                             children: [
                               TextSpan(text: song.title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                               TextSpan(text: " - ${song.originalSinger}", style: const TextStyle(fontSize: 13, color: Colors.blueGrey, fontWeight: FontWeight.w500)),

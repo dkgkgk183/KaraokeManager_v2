@@ -144,7 +144,7 @@ class _CourseGeneratorScreenState extends ConsumerState<CourseGeneratorScreen> {
                         child: RichText(
                           overflow: TextOverflow.ellipsis,
                           text: TextSpan(
-                            style: const TextStyle(color: Colors.black),
+                            style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
                             children: [
                               TextSpan(text: song.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
                               TextSpan(text: " - ${song.originalSinger}", style: const TextStyle(fontSize: 12, color: Colors.blueGrey)),

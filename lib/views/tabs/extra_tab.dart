@@ -31,10 +31,66 @@ class _ExtraTabState extends ConsumerState<ExtraTab> {
     });
   }
 
+  void _showThemeDialog() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        final current = ref.read(appThemeModeProvider);
+        return AlertDialog(
+          title: const Text('테마 설정'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              RadioListTile<ThemeMode>(
+                title: const Text('라이트 모드'),
+                secondary: const Icon(Icons.light_mode),
+                value: ThemeMode.light,
+                groupValue: current,
+                onChanged: (v) {
+                  ref.read(appThemeModeProvider.notifier).setTheme(v!);
+                  Navigator.pop(context);
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text('다크 모드'),
+                secondary: const Icon(Icons.dark_mode),
+                value: ThemeMode.dark,
+                groupValue: current,
+                onChanged: (v) {
+                  ref.read(appThemeModeProvider.notifier).setTheme(v!);
+                  Navigator.pop(context);
+                },
+              ),
+              RadioListTile<ThemeMode>(
+                title: const Text('시스템 설정 따르기'),
+                secondary: const Icon(Icons.settings_suggest),
+                value: ThemeMode.system,
+                groupValue: current,
+                onChanged: (v) {
+                  ref.read(appThemeModeProvider.notifier).setTheme(v!);
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final libraryAsync = ref.watch(libraryViewModelProvider);
     final recommendBrand = ref.watch(recommendBrandProvider);
+    final themeMode = ref.watch(appThemeModeProvider);
+
+    String themeModeLabel() {
+      switch (themeMode) {
+        case ThemeMode.light: return '라이트 모드';
+        case ThemeMode.dark: return '다크 모드';
+        case ThemeMode.system: return '시스템 설정';
+      }
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('부가 정보'), centerTitle: true),
@@ -57,10 +113,14 @@ class _ExtraTabState extends ConsumerState<ExtraTab> {
             title: const Text('랜덤 노래 코스 생성기'),
             subtitle: const Text('오늘 부를 노래 리스트를 한꺼번에 짜줄게!'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const CourseGeneratorScreen())
-            ),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CourseGeneratorScreen())),
+          ),
+          ListTile(
+            leading: const Icon(Icons.palette),
+            title: const Text('테마 설정'),
+            subtitle: Text(themeModeLabel()),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: _showThemeDialog,
           ),
           const Divider(),
           Padding(
