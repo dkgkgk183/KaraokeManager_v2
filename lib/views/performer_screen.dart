@@ -1,3 +1,4 @@
+import '../main.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../viewmodels/karaoke_view_model.dart';
@@ -35,6 +36,38 @@ class PerformerScreen extends ConsumerWidget {
     ));
   }
 
+  Future<void> _showSessionDates(BuildContext context, Performer p) async {
+    final dates = await database.getSessionDatesByPerformer(p.name);
+    if (dates.isEmpty) return;  // 날짜 없으면 아무 동작 없음
+
+    if (!context.mounted) return;
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('${p.name}이(가) 노래한 날'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: dates.length,
+            itemBuilder: (context, i) => ListTile(
+              dense: true,
+              leading: const Icon(Icons.calendar_month, size: 18, color: Colors.indigo),
+              title: Text(
+                '${dates[i].year}년 ${dates[i].month}월 ${dates[i].day}일',
+                style: const TextStyle(fontSize: 14),
+              ),
+            ),
+          ),
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('닫기')),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final performersAsync = ref.watch(performerViewModelProvider);
@@ -47,6 +80,7 @@ class PerformerScreen extends ConsumerWidget {
             final p = list[index];
             return ListTile(
               title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+              onTap: () => _showSessionDates(context, p),  // ← 추가
               trailing: IconButton(
                 icon: const Icon(Icons.delete, color: Colors.redAccent, size: 20),
                 onPressed: () => _showDeleteWarning(context, ref, p),

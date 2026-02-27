@@ -140,6 +140,20 @@ class AppDatabase extends _$AppDatabase {
       innerJoin(librarySongs, librarySongs.id.equalsExp(sessionEntries.librarySongId)),
     ]);
   }
+
+  /// 특정 performer가 노래한 세션 날짜 목록 (중복 제거, 최신순)
+  Future<List<DateTime>> getSessionDatesByPerformer(String name) async {
+    final query = selectOnly(sessions).join([
+      innerJoin(sessionEntries, sessionEntries.sessionId.equalsExp(sessions.id)),
+    ])
+      ..where(sessionEntries.performer.equals(name))
+      ..addColumns([sessions.date])
+      ..groupBy([sessions.id])
+      ..orderBy([OrderingTerm.desc(sessions.date)]);
+
+    final results = await query.get();
+    return results.map((row) => row.read(sessions.date)!).toList();
+  }
 }
 
 LazyDatabase _openConnection() {

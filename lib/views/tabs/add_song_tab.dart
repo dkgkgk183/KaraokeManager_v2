@@ -10,6 +10,7 @@ class AddSongTab extends ConsumerStatefulWidget {
   ConsumerState<AddSongTab> createState() => _AddSongTabState();
 }
 
+bool _showOnlyHighlighted = false;
 class _AddSongTabState extends ConsumerState<AddSongTab> {
   final List<String> _notes = ['~2옥타브 솔#', '2옥타브 라~시', '3옥타브 도~'];
 
@@ -220,6 +221,13 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
         actions: [
           Row(
             children: [
+              const Text('⭐', style: TextStyle(fontSize: 12)),
+              Checkbox(
+                visualDensity: VisualDensity.compact,
+                value: _showOnlyHighlighted,
+                onChanged: (_) => setState(() => _showOnlyHighlighted = !_showOnlyHighlighted),
+              ),
+              const SizedBox(width: 4),
               const Text('음역대로 분류', style: TextStyle(fontSize: 12)),
               Checkbox(
                 visualDensity: VisualDensity.compact,
@@ -243,11 +251,17 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
           } else {
             sortedSongs.sort((a, b) => _compareTitles(a.title, b.title));
           }
-
+          final displaySongs = _showOnlyHighlighted
+              ? sortedSongs.where((s) => s.isHighlighted).toList()
+              : sortedSongs;
           return ListView.builder(
-            itemCount: sortedSongs.length,
+            itemCount: displaySongs.length + 1,  // ← +1 (하단 여백용)
             itemBuilder: (context, index) {
-              final song = sortedSongs[index];
+              // ← 마지막 아이템은 빈 여백
+              if (index == displaySongs.length) {
+                return const SizedBox(height: 80);
+              }
+              final song = displaySongs[index];
               return InkWell(
                 onTap: () => ref.read(libraryViewModelProvider.notifier).toggleHighlight(song),
                 onLongPress: () => _showEditDialog(song),
