@@ -24,13 +24,19 @@ class MyApp extends ConsumerWidget {
       theme: ThemeData(
         useMaterial3: true,
         colorSchemeSeed: Colors.blue,
-        appBarTheme: const AppBarTheme(centerTitle: true),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          scrolledUnderElevation: 0,  // ← 이게 핵심
+        ),
       ),
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
         colorSchemeSeed: Colors.blue,
-        appBarTheme: const AppBarTheme(centerTitle: true),
+        appBarTheme: const AppBarTheme(
+          centerTitle: true,
+          scrolledUnderElevation: 0,  // ← 추가
+        ),
       ),
       home: const MainScreen(),
     );

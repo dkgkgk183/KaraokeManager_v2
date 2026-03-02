@@ -269,7 +269,12 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   decoration: BoxDecoration(
                     color: song.isHighlighted ? Colors.yellow.withOpacity(0.3) : Colors.transparent,
-                    border: Border(bottom: BorderSide(color: Colors.grey.shade200, width: 0.5)),
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey.shade400,  // shade200 → shade400
+                        width: 1.0,                   // 0.5 → 1.0
+                      ),
+                    ),
                   ),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
