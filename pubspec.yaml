@@ -46,6 +46,7 @@ dependencies:
   http: any
   html: any
   audioplayers: ^6.6.0
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:

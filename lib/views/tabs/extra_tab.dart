@@ -31,50 +31,55 @@ class _ExtraTabState extends ConsumerState<ExtraTab> {
     });
   }
 
-  void _showThemeDialog() {
+  void _showSettingsDialog() {
     showDialog(
       context: context,
-      builder: (context) {
-        final current = ref.read(appThemeModeProvider);
-        return AlertDialog(
-          title: const Text('테마 설정'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RadioListTile<ThemeMode>(
-                title: const Text('라이트 모드'),
-                secondary: const Icon(Icons.light_mode),
-                value: ThemeMode.light,
-                groupValue: current,
-                onChanged: (v) {
-                  ref.read(appThemeModeProvider.notifier).setTheme(v!);
-                  Navigator.pop(context);
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: const Text('다크 모드'),
-                secondary: const Icon(Icons.dark_mode),
-                value: ThemeMode.dark,
-                groupValue: current,
-                onChanged: (v) {
-                  ref.read(appThemeModeProvider.notifier).setTheme(v!);
-                  Navigator.pop(context);
-                },
-              ),
-              RadioListTile<ThemeMode>(
-                title: const Text('시스템 설정 따르기'),
-                secondary: const Icon(Icons.settings_suggest),
-                value: ThemeMode.system,
-                groupValue: current,
-                onChanged: (v) {
-                  ref.read(appThemeModeProvider.notifier).setTheme(v!);
-                  Navigator.pop(context);
-                },
+      builder: (context) => Consumer(
+        builder: (context, ref, _) {
+          final currentTheme = ref.watch(appThemeModeProvider);
+          final showHighestNote = ref.watch(showHighestNoteProvider);
+          return AlertDialog(
+            title: const Text('기타 설정'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text('테마 설정', style: TextStyle(fontWeight: FontWeight.bold)),
+                RadioListTile<ThemeMode>(
+                  title: const Text('라이트 모드'),
+                  value: ThemeMode.light,
+                  groupValue: currentTheme,
+                  onChanged: (v) => ref.read(appThemeModeProvider.notifier).setTheme(v!),
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('다크 모드'),
+                  value: ThemeMode.dark,
+                  groupValue: currentTheme,
+                  onChanged: (v) => ref.read(appThemeModeProvider.notifier).setTheme(v!),
+                ),
+                RadioListTile<ThemeMode>(
+                  title: const Text('시스템 설정 따르기'),
+                  value: ThemeMode.system,
+                  groupValue: currentTheme,
+                  onChanged: (v) => ref.read(appThemeModeProvider.notifier).setTheme(v!),
+                ),
+                const Divider(),
+                CheckboxListTile(
+                  title: const Text('최고음 보기'),
+                  value: showHighestNote,
+                  onChanged: (_) => ref.read(showHighestNoteProvider.notifier).toggle(),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('닫기'),
               ),
             ],
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -82,15 +87,6 @@ class _ExtraTabState extends ConsumerState<ExtraTab> {
   Widget build(BuildContext context) {
     final libraryAsync = ref.watch(libraryViewModelProvider);
     final recommendBrand = ref.watch(recommendBrandProvider);
-    final themeMode = ref.watch(appThemeModeProvider);
-
-    String themeModeLabel() {
-      switch (themeMode) {
-        case ThemeMode.light: return '라이트 모드';
-        case ThemeMode.dark: return '다크 모드';
-        case ThemeMode.system: return '시스템 설정';
-      }
-    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('부가 정보'), centerTitle: true),
@@ -116,11 +112,11 @@ class _ExtraTabState extends ConsumerState<ExtraTab> {
             onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => const CourseGeneratorScreen())),
           ),
           ListTile(
-            leading: const Icon(Icons.palette),
-            title: const Text('테마 설정'),
-            subtitle: Text(themeModeLabel()),
+            leading: const Icon(Icons.settings),
+            title: const Text('기타 설정'),
+            subtitle: const Text('테마, 최고음 표시 등'),
             trailing: const Icon(Icons.chevron_right),
-            onTap: _showThemeDialog,
+            onTap: _showSettingsDialog,
           ),
           const Divider(),
           Padding(

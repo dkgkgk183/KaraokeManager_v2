@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'database/database.dart';
 import 'viewmodels/ui_state.dart';
 import 'views/main_screen.dart';
 
 late AppDatabase database;
+late SharedPreferences prefs;
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  prefs = await SharedPreferences.getInstance();
   database = AppDatabase();
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -26,7 +29,7 @@ class MyApp extends ConsumerWidget {
         colorSchemeSeed: Colors.blue,
         appBarTheme: const AppBarTheme(
           centerTitle: true,
-          scrolledUnderElevation: 0,  // ← 이게 핵심
+          scrolledUnderElevation: 0,
         ),
       ),
       darkTheme: ThemeData(
@@ -35,7 +38,7 @@ class MyApp extends ConsumerWidget {
         colorSchemeSeed: Colors.blue,
         appBarTheme: const AppBarTheme(
           centerTitle: true,
-          scrolledUnderElevation: 0,  // ← 추가
+          scrolledUnderElevation: 0,
         ),
       ),
       home: const MainScreen(),

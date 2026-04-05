@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+import '../main.dart';
 
 part 'ui_state.g.dart';
 
@@ -54,4 +55,14 @@ class AppThemeMode extends _$AppThemeMode {
   @override
   ThemeMode build() => ThemeMode.system;
   void setTheme(ThemeMode mode) => state = mode;
+}
+
+@Riverpod(keepAlive: true)
+class ShowHighestNote extends _$ShowHighestNote {
+  @override
+  bool build() => prefs.getBool('showHighestNote') ?? false;
+  void toggle() {
+    state = !state;
+    prefs.setBool('showHighestNote', state);
+  }
 }

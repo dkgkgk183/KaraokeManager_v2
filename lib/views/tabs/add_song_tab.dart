@@ -19,13 +19,13 @@ class SongResult {
   final String number;
   final String title;
   final String singer;
-  final List<String> tags; // 아이콘(태그) 정보를 담을 리스트 추가
+  final List<String> tags;
 
   SongResult({
     required this.number,
     required this.title,
     required this.singer,
-    this.tags = const [], // 기본값은 빈 리스트
+    this.tags = const [],
   });
 }
 
@@ -94,14 +94,13 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
           List<String> rawParts = rawText.split('|');
 
           List<String> cleaned = [];
-          List<String> tags = []; // 태그 정보를 저장할 리스트
+          List<String> tags = [];
 
           for (String part in rawParts) {
             String text = part.replaceAll(RegExp(r'\s+'), ' ').trim();
 
             if (text.isEmpty) continue;
 
-            // 기존에 버려졌던 MR, MV, 반주기 전용곡 텍스트를 tags 리스트에 추가
             if (text == 'MR' || text == 'MV' || text.contains('반주기 전용곡')) {
               tags.add(text);
               continue;
@@ -124,7 +123,6 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
 
             if (title == '곡제목' || singer == '가수') continue;
 
-            // 객체 생성 시 tags 정보도 함께 전달
             results.add(SongResult(
                 number: number,
                 title: title,
@@ -174,7 +172,6 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                             final song = results[index];
                             return ListTile(
                               title: Text(song.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                              // subtitle을 Column으로 변경하여 가수 이름 아래에 태그들이 나오게 만듦
                               subtitle: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -268,6 +265,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
     String? tErr, sErr;
     bool isDup = false;
     int searchType = 1;
+    final showHighestNote = ref.read(showHighestNoteProvider);
 
     showDialog(
       context: context,
@@ -377,10 +375,16 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                   TextField(controller: nCtrl, onChanged: (_) => validate(), decoration: const InputDecoration(labelText: '번호', isDense: true)),
                   DropdownButtonFormField<String>(
                     value: noteVal,
-                    items: _notes.map((n) => DropdownMenuItem(value: n, child: Text(n, style: TextStyle(color: _getNoteColor(n))))).toList(),
-                    onChanged: (v) { setST(() => noteVal = v!); validate(); },
+                    items: _notes.map((n) => DropdownMenuItem(value: n, child: Text(n, style: TextStyle(color: showHighestNote ? _getNoteColor(n) : Colors.grey)))).toList(),
+                    onChanged: showHighestNote ? (v) { setST(() => noteVal = v!); validate(); } : null,
                     decoration: const InputDecoration(labelText: '최고음 영역', isDense: true),
+                    disabledHint: Text(noteVal, style: const TextStyle(color: Colors.grey)),
                   ),
+                  if (!showHighestNote)
+                    const Padding(
+                      padding: EdgeInsets.only(top: 4.0),
+                      child: Text('이 기능을 사용하려면 기타 설정에서 최고음 표시를 켜시오.', style: TextStyle(color: Colors.red, fontSize: 10)),
+                    ),
                   if (isDup)
                     const Padding(
                       padding: EdgeInsets.only(top: 8.0),
@@ -486,6 +490,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
     final nCtrl = TextEditingController(text: song.songNumber);
     String bVal = song.machineBrand;
     String noteVal = _notes.contains(song.highestNote) ? song.highestNote : _notes[0];
+    final showHighestNote = ref.read(showHighestNoteProvider);
 
     showDialog(
       context: context,
@@ -501,10 +506,16 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                 TextField(controller: nCtrl, decoration: const InputDecoration(labelText: '번호', isDense: true)),
                 DropdownButtonFormField<String>(
                   value: noteVal,
-                  items: _notes.map((n) => DropdownMenuItem(value: n, child: Text(n, style: TextStyle(color: _getNoteColor(n))))).toList(),
-                  onChanged: (v) => setST(() => noteVal = v!),
+                  items: _notes.map((n) => DropdownMenuItem(value: n, child: Text(n, style: TextStyle(color: showHighestNote ? _getNoteColor(n) : Colors.grey)))).toList(),
+                  onChanged: showHighestNote ? (v) => setST(() => noteVal = v!) : null,
                   decoration: const InputDecoration(labelText: '최고음 영역', isDense: true),
+                  disabledHint: Text(noteVal, style: const TextStyle(color: Colors.grey)),
                 ),
+                if (!showHighestNote)
+                  const Padding(
+                    padding: EdgeInsets.only(top: 4.0),
+                    child: Text('이 기능을 사용하려면 기타 설정에서 최고음 표시를 켜시오.', style: TextStyle(color: Colors.red, fontSize: 10)),
+                  ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -545,6 +556,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
   Widget build(BuildContext context) {
     final libraryAsync = ref.watch(libraryViewModelProvider);
     final isSortByNote = ref.watch(isSortByNoteProvider);
+    final showHighestNote = ref.watch(showHighestNoteProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -558,13 +570,15 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                 value: _showOnlyHighlighted,
                 onChanged: (_) => setState(() => _showOnlyHighlighted = !_showOnlyHighlighted),
               ),
-              const SizedBox(width: 4),
-              const Text('음역대로 분류', style: TextStyle(fontSize: 12)),
-              Checkbox(
-                visualDensity: VisualDensity.compact,
-                value: isSortByNote,
-                onChanged: (_) => ref.read(isSortByNoteProvider.notifier).toggle(),
-              ),
+              if (showHighestNote) ...[
+                const SizedBox(width: 4),
+                const Text('음역대로 분류', style: TextStyle(fontSize: 12)),
+                Checkbox(
+                  visualDensity: VisualDensity.compact,
+                  value: isSortByNote,
+                  onChanged: (_) => ref.read(isSortByNoteProvider.notifier).toggle(),
+                ),
+              ],
               const SizedBox(width: 8),
             ],
           )
@@ -573,7 +587,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
       body: libraryAsync.when(
         data: (songs) {
           final sortedSongs = List<LibrarySong>.from(songs);
-          if (isSortByNote) {
+          if (isSortByNote && showHighestNote) {
             sortedSongs.sort((a, b) {
               int cmp = _notes.indexOf(a.highestNote).compareTo(_notes.indexOf(b.highestNote));
               if (cmp != 0) return cmp;
@@ -630,7 +644,8 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                         mainAxisSize: MainAxisSize.min,
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          Text(song.highestNote, style: TextStyle(color: _getNoteColor(song.highestNote), fontWeight: FontWeight.bold, fontSize: 11)),
+                          if (showHighestNote)
+                            Text(song.highestNote, style: TextStyle(color: _getNoteColor(song.highestNote), fontWeight: FontWeight.bold, fontSize: 11)),
                           Text('${song.machineBrand} ${song.songNumber}', style: TextStyle(fontSize: 10, color: _getBrandColor(song.machineBrand), fontWeight: FontWeight.bold)),
                         ],
                       ),

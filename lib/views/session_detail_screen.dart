@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../database/database.dart';
 import '../viewmodels/karaoke_view_model.dart';
+import '../viewmodels/ui_state.dart';
 
 class SessionDetailScreen extends ConsumerStatefulWidget {
   final Session session;
@@ -114,6 +115,7 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen> {
     final sessions = ref.watch(sessionViewModelProvider).value ?? [];
     final performersAsync = ref.watch(performerViewModelProvider);
     final currentSession = sessions.firstWhere((s) => s.id == widget.session.id, orElse: () => widget.session);
+    final showHighestNote = ref.watch(showHighestNoteProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -182,7 +184,8 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen> {
                             ),
                           ),
                           Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                            Text(s.highestNote, style: TextStyle(color: _getNoteColor(s.highestNote), fontSize: 10, fontWeight: FontWeight.bold)),
+                            if (showHighestNote)
+                              Text(s.highestNote, style: TextStyle(color: _getNoteColor(s.highestNote), fontSize: 10, fontWeight: FontWeight.bold)),
                             Text('${s.machineBrand} ${s.songNumber}', style: TextStyle(color: _getBrandColor(s.machineBrand), fontSize: 9, fontWeight: FontWeight.bold)),
                           ]),
                         ]),
@@ -240,7 +243,8 @@ class _SessionDetailScreenState extends ConsumerState<SessionDetailScreen> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
-                              Text(song.highestNote, style: TextStyle(color: _getNoteColor(song.highestNote), fontSize: 11, fontWeight: FontWeight.bold)),
+                              if (showHighestNote)
+                                Text(song.highestNote, style: TextStyle(color: _getNoteColor(song.highestNote), fontSize: 11, fontWeight: FontWeight.bold)),
                               Text('${song.machineBrand} ${song.songNumber}', style: TextStyle(color: _getBrandColor(song.machineBrand), fontSize: 10, fontWeight: FontWeight.bold)),
                             ],
                           ),

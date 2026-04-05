@@ -369,7 +369,7 @@ final dataManagementViewModelProvider =
 
 typedef _$DataManagementViewModel = AutoDisposeNotifier<void>;
 String _$songRankingViewModelHash() =>
-    r'1128a31cc06e5023c1034c7d9422c6805ae479c7';
+    r'0afc7c94c746eab4ed8b4e9f9cba142554c84e70';
 
 /// See also [SongRankingViewModel].
 @ProviderFor(SongRankingViewModel)

@@ -112,5 +112,21 @@ final appThemeModeProvider = NotifierProvider<AppThemeMode, ThemeMode>.internal(
 );
 
 typedef _$AppThemeMode = Notifier<ThemeMode>;
+String _$showHighestNoteHash() => r'4c7b9d8bae2997df79d9fb6b857a8b48c5730490';
+
+/// See also [ShowHighestNote].
+@ProviderFor(ShowHighestNote)
+final showHighestNoteProvider =
+    NotifierProvider<ShowHighestNote, bool>.internal(
+      ShowHighestNote.new,
+      name: r'showHighestNoteProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$showHighestNoteHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+typedef _$ShowHighestNote = Notifier<bool>;
 // ignore_for_file: type=lint
 // ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
