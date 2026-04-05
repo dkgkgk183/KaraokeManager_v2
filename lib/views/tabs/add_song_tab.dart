@@ -19,7 +19,14 @@ class SongResult {
   final String number;
   final String title;
   final String singer;
-  SongResult({required this.number, required this.title, required this.singer});
+  final List<String> tags; // 아이콘(태그) 정보를 담을 리스트 추가
+
+  SongResult({
+    required this.number,
+    required this.title,
+    required this.singer,
+    this.tags = const [], // 기본값은 빈 리스트
+  });
 }
 
 class _AddSongTabState extends ConsumerState<AddSongTab> {
@@ -63,9 +70,9 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
     return '';
   }
 
-  Future<List<SongResult>> _searchKaraoke(String keyword) async {
+  Future<List<SongResult>> _searchKaraoke(String keyword, int pageNo, int searchType) async {
     final url = Uri.parse(
-        'https://www.tjmedia.com/song/accompaniment_search?pageNo=1&searchTxt=$keyword&strType=1');
+        'https://www.tjmedia.com/song/accompaniment_search?pageNo=$pageNo&searchTxt=$keyword&strType=$searchType');
 
     try {
       final response = await http.get(
@@ -87,11 +94,18 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
           List<String> rawParts = rawText.split('|');
 
           List<String> cleaned = [];
+          List<String> tags = []; // 태그 정보를 저장할 리스트
+
           for (String part in rawParts) {
             String text = part.replaceAll(RegExp(r'\s+'), ' ').trim();
 
             if (text.isEmpty) continue;
-            if (text == 'MR' || text == 'MV' || text.contains('반주기 전용곡')) continue;
+
+            // 기존에 버려졌던 MR, MV, 반주기 전용곡 텍스트를 tags 리스트에 추가
+            if (text == 'MR' || text == 'MV' || text.contains('반주기 전용곡')) {
+              tags.add(text);
+              continue;
+            }
 
             text = text.replaceAll('곡번호', '').trim();
             if (text.isEmpty) continue;
@@ -110,7 +124,13 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
 
             if (title == '곡제목' || singer == '가수') continue;
 
-            results.add(SongResult(number: number, title: title, singer: singer));
+            // 객체 생성 시 tags 정보도 함께 전달
+            results.add(SongResult(
+                number: number,
+                title: title,
+                singer: singer,
+                tags: tags
+            ));
           }
         }
         return results;
@@ -122,39 +142,116 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
     }
   }
 
-  void _showSearchResultsPopup(List<SongResult> results, Function(SongResult) onSelect) {
+  void _showSearchResultsPopup(String keyword, int searchType, List<SongResult> initialResults, Function(SongResult) onSelect) {
+    int currentPage = 1;
+    List<SongResult> results = initialResults;
+    bool isLoading = false;
+
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text('검색 결과', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-          content: SizedBox(
-            width: double.maxFinite,
-            height: 400,
-            child: ListView.separated(
-              shrinkWrap: true,
-              itemCount: results.length,
-              separatorBuilder: (context, index) => const Divider(height: 1),
-              itemBuilder: (context, index) {
-                final song = results[index];
-                return ListTile(
-                  title: Text(song.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                  subtitle: Text(song.singer, style: const TextStyle(color: Colors.blueGrey, fontSize: 12)),
-                  trailing: Text(song.number, style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 13)),
-                  onTap: () {
-                    onSelect(song);
-                    Navigator.pop(context);
-                  },
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('닫기'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setPopupState) {
+            return AlertDialog(
+              insetPadding: const EdgeInsets.all(16),
+              title: const Text('검색 결과', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              content: SizedBox(
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.height * 0.7,
+                child: Column(
+                  children: [
+                    if (isLoading)
+                      const Expanded(child: Center(child: CircularProgressIndicator()))
+                    else if (results.isEmpty)
+                      const Expanded(child: Center(child: Text('검색 결과가 없어, 뜌땨!')))
+                    else
+                      Expanded(
+                        child: ListView.separated(
+                          shrinkWrap: true,
+                          itemCount: results.length,
+                          separatorBuilder: (context, index) => const Divider(height: 1),
+                          itemBuilder: (context, index) {
+                            final song = results[index];
+                            return ListTile(
+                              title: Text(song.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              // subtitle을 Column으로 변경하여 가수 이름 아래에 태그들이 나오게 만듦
+                              subtitle: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(song.singer, style: const TextStyle(color: Colors.blueGrey, fontSize: 12)),
+                                  if (song.tags.isNotEmpty)
+                                    Padding(
+                                      padding: const EdgeInsets.only(top: 4.0),
+                                      child: Wrap(
+                                        spacing: 4,
+                                        children: song.tags.map((tag) => Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: Colors.grey.shade200,
+                                            borderRadius: BorderRadius.circular(4),
+                                            border: Border.all(color: Colors.grey.shade400, width: 0.5),
+                                          ),
+                                          child: Text(tag, style: const TextStyle(fontSize: 10, color: Colors.black87)),
+                                        )).toList(),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              trailing: Text(song.number, style: const TextStyle(color: Colors.purple, fontWeight: FontWeight.bold, fontSize: 13)),
+                              onTap: () {
+                                onSelect(song);
+                                Navigator.pop(context);
+                              },
+                            );
+                          },
+                        ),
+                      ),
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        TextButton(
+                          onPressed: currentPage > 1 && !isLoading
+                              ? () async {
+                            setPopupState(() => isLoading = true);
+                            final newResults = await _searchKaraoke(keyword, currentPage - 1, searchType);
+                            setPopupState(() {
+                              currentPage--;
+                              results = newResults;
+                              isLoading = false;
+                            });
+                          }
+                              : null,
+                          child: const Text('이전 페이지'),
+                        ),
+                        Text('$currentPage 페이지', style: const TextStyle(fontWeight: FontWeight.bold)),
+                        TextButton(
+                          onPressed: !isLoading && results.isNotEmpty
+                              ? () async {
+                            setPopupState(() => isLoading = true);
+                            final newResults = await _searchKaraoke(keyword, currentPage + 1, searchType);
+                            setPopupState(() {
+                              currentPage++;
+                              results = newResults;
+                              isLoading = false;
+                            });
+                          }
+                              : null,
+                          child: const Text('다음 페이지'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('닫기'),
+                ),
+              ],
+            );
+          },
         );
       },
     );
@@ -170,6 +267,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
     String noteVal = _notes[0];
     String? tErr, sErr;
     bool isDup = false;
+    int searchType = 1;
 
     showDialog(
       context: context,
@@ -208,10 +306,27 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                   ),
                   Row(
                     children: [
+                      const Text('곡 제목', style: TextStyle(fontSize: 12)),
+                      Checkbox(
+                        visualDensity: VisualDensity.compact,
+                        value: searchType == 1,
+                        onChanged: (v) { if (v == true) setST(() => searchType = 1); },
+                      ),
+                      const SizedBox(width: 8),
+                      const Text('가수', style: TextStyle(fontSize: 12)),
+                      Checkbox(
+                        visualDensity: VisualDensity.compact,
+                        value: searchType == 2,
+                        onChanged: (v) { if (v == true) setST(() => searchType = 2); },
+                      ),
+                    ],
+                  ),
+                  Row(
+                    children: [
                       Expanded(
                         child: TextField(
                           controller: searchCtrl,
-                          decoration: const InputDecoration(labelText: 'TJ 온라인 검색', isDense: true, hintText: '제목 또는 가수 입력'),
+                          decoration: const InputDecoration(labelText: 'TJ 온라인 검색', isDense: true, hintText: '검색어 입력'),
                         ),
                       ),
                       IconButton(
@@ -225,7 +340,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                             builder: (context) => const Center(child: CircularProgressIndicator()),
                           );
 
-                          final results = await _searchKaraoke(searchCtrl.text);
+                          final results = await _searchKaraoke(searchCtrl.text, 1, searchType);
 
                           if (mounted) Navigator.pop(context);
 
@@ -234,7 +349,7 @@ class _AddSongTabState extends ConsumerState<AddSongTab> {
                               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('검색 결과가 없어, 뜌땨!')));
                             }
                           } else {
-                            _showSearchResultsPopup(results, (selectedSong) {
+                            _showSearchResultsPopup(searchCtrl.text, searchType, results, (selectedSong) {
                               setST(() {
                                 tCtrl.text = selectedSong.title;
                                 sCtrl.text = selectedSong.singer;
