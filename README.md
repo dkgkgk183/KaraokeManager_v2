@@ -32,6 +32,3 @@ Now you can systematically manage your favorite songs and records from the karao
     * You can securely manage your data as **Backup & Restore** are also available in the PC environment.
 * **Integrated Search for Karaoke Machine Sites**
     * Conveniently **search song numbers and information** by linking with the websites of each karaoke machine brand.
-
----
-💡 **How to Install:** Please download and run the appropriate installation file (APK, etc.) for your device from the `Assets` section below.
