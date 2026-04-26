@@ -10,6 +10,8 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../database/database.dart';
 import '../main.dart';
+import '../services/supabase_service.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supa;
 
 part 'karaoke_view_model.g.dart';
 
@@ -39,20 +41,34 @@ class LibraryViewModel extends _$LibraryViewModel {
 
     if (isDuplicate) return false;
 
+    final id = _generateId();
     await database.insertLibrarySong(LibrarySongsCompanion.insert(
-      id: _generateId(),
+      id: id,
       title: title,
       originalSinger: originalSinger,
       songNumber: songNumber,
       machineBrand: machineBrand,
       highestNote: highestNote,
     ));
+
+    // 클라우드 동기화
+    await SupabaseService.upsertSong(LibrarySong(
+      id: id,
+      title: title,
+      originalSinger: originalSinger,
+      songNumber: songNumber,
+      machineBrand: machineBrand,
+      highestNote: highestNote,
+      isHighlighted: false,
+    ));
+
     ref.invalidateSelf();
     return true;
   }
 
   Future<void> updateSong(LibrarySong song) async {
     await database.updateLibrarySong(song);
+    await SupabaseService.upsertSong(song); // 클라우드 동기화
     ref.invalidateSelf();
   }
 
@@ -62,6 +78,7 @@ class LibraryViewModel extends _$LibraryViewModel {
         .get();
 
     await database.deleteLibrarySong(song.id);
+    await SupabaseService.deleteSong(song.id); // 클라우드 동기화
     ref.invalidateSelf();
 
     if (!context.mounted) return;
@@ -75,8 +92,10 @@ class LibraryViewModel extends _$LibraryViewModel {
           label: '복원',
           onPressed: () async {
             await database.insertLibrarySong(song.toCompanion(false));
+            await SupabaseService.upsertSong(song); // 클라우드 복원
             for (final entry in entriesBackup) {
               await database.insertSessionEntry(entry.toCompanion(false));
+              await SupabaseService.upsertSessionEntry(entry); // 클라우드 복원
             }
             ref.invalidateSelf();
             ref.invalidate(sessionViewModelProvider);
@@ -86,7 +105,9 @@ class LibraryViewModel extends _$LibraryViewModel {
   }
 
   Future<void> toggleHighlight(LibrarySong song) async {
-    await database.updateSongHighlight(song.id, !song.isHighlighted);
+    final newValue = !song.isHighlighted;
+    await database.updateSongHighlight(song.id, newValue);
+    await SupabaseService.updateSongHighlight(song.id, newValue); // 클라우드 동기화
     ref.invalidateSelf();
   }
 }
@@ -97,20 +118,31 @@ class SessionViewModel extends _$SessionViewModel {
   Future<List<Session>> build() => database.getAllSessions();
 
   Future<void> addSession(DateTime date) async {
+    final id = _generateId();
     await database.insertSession(SessionsCompanion.insert(
-      id: _generateId(),
+      id: id,
       date: date,
+    ));
+    // 클라우드 동기화
+    await SupabaseService.upsertSession(Session(
+      id: id,
+      date: date,
+      title: '',
+      rating: 0,
+      memo: '',
     ));
     ref.invalidateSelf();
   }
 
   Future<void> updateSessionInfo(Session session) async {
     await database.updateSession(session);
+    await SupabaseService.upsertSession(session); // 클라우드 동기화
     ref.invalidateSelf();
   }
 
   Future<void> deleteSession(String sessionId) async {
     await database.deleteSession(sessionId);
+    await SupabaseService.deleteSessionAndEntries(sessionId); // 클라우드 동기화
     ref.invalidateSelf();
   }
 }
@@ -121,16 +153,20 @@ class PerformerViewModel extends _$PerformerViewModel {
   Future<List<Performer>> build() => database.getAllPerformers();
 
   Future<void> addPerformer(String name) async {
+    final id = _generateId();
     await database.insertPerformer(PerformersCompanion.insert(
-      id: _generateId(),
+      id: id,
       name: name,
     ));
+    await SupabaseService.upsertPerformer(Performer(id: id, name: name)); // 클라우드 동기화
     ref.invalidateSelf();
   }
 
   Future<void> removePerformer(Performer performer) async {
     await database.clearPerformerNameFromEntries(performer.name);
+    await SupabaseService.clearPerformerNameFromEntries(performer.name); // 클라우드 동기화
     await database.deletePerformer(performer.id);
+    await SupabaseService.deletePerformer(performer.id); // 클라우드 동기화
     ref.invalidateSelf();
   }
 }
@@ -150,23 +186,35 @@ class SessionDetailViewModel extends _$SessionDetailViewModel {
 
   Future<void> addSongToSession(LibrarySong song) async {
     final current = state.value ?? [];
+    final id = _generateId();
+    final sortOrder = current.length;
     await database.insertSessionEntry(SessionEntriesCompanion.insert(
-      id: _generateId(),
+      id: id,
       sessionId: sessionId,
       librarySongId: song.id,
-      sortOrder: drift.Value(current.length),
+      sortOrder: drift.Value(sortOrder),
+    ));
+    // 클라우드 동기화
+    await SupabaseService.upsertSessionEntry(SessionEntry(
+      id: id,
+      sessionId: sessionId,
+      librarySongId: song.id,
+      performer: '',
+      sortOrder: sortOrder,
     ));
     ref.invalidateSelf();
   }
 
   Future<void> removeEntry(String entryId) async {
     await database.deleteSessionEntry(entryId);
+    await SupabaseService.deleteSessionEntry(entryId); // 클라우드 동기화
     ref.invalidateSelf();
     ref.invalidate(sessionViewModelProvider);
   }
 
   Future<void> updatePerformer(String entryId, String name) async {
     await database.updateEntryPerformer(entryId, name);
+    await SupabaseService.updateEntryPerformer(entryId, name); // 클라우드 동기화
     ref.invalidateSelf();
   }
 
@@ -183,6 +231,12 @@ class SessionDetailViewModel extends _$SessionDetailViewModel {
         await database.updateEntryOrder(entry.id, i);
       }
     });
+
+    // 클라우드 동기화 (순서 변경된 항목들)
+    for (int i = 0; i < list.length; i++) {
+      final entry = list[i]['entry'] as SessionEntry;
+      await SupabaseService.updateEntryOrder(entry.id, i);
+    }
 
     ref.invalidateSelf();
   }
@@ -215,13 +269,22 @@ class DataManagementViewModel extends _$DataManagementViewModel {
     final rows = <List<dynamic>>[
       ['#TYPE', 'ID(수정금지)', 'DATA1', 'DATA2', 'DATA3', 'DATA4', 'DATA5', 'DATA6'],
       ...songs.map((s) => [
-        'SONG', 'ID_${s.id}', s.title, s.originalSinger,
-        s.songNumber, s.machineBrand, s.highestNote, s.isHighlighted ? 1 : 0,
+        'SONG',
+        'ID_${s.id}',
+        s.title,
+        s.originalSinger,
+        s.songNumber,
+        s.machineBrand,
+        s.highestNote,
+        s.isHighlighted ? 1 : 0,
       ]),
       ...sessions.map((s) => [
-        'SESS', 'ID_${s.id}',
+        'SESS',
+        'ID_${s.id}',
         DateFormat('yyyy-MM-dd HH:mm:ss').format(s.date),
-        s.title, s.rating, s.memo,
+        s.title,
+        s.rating,
+        s.memo,
       ]),
     ];
 
@@ -232,7 +295,14 @@ class DataManagementViewModel extends _$DataManagementViewModel {
         displayIdx = 1;
         lastSessId = e.sessionId;
       }
-      rows.add(['ENTR', 'ID_${e.id}', 'ID_${e.sessionId}', 'ID_${e.librarySongId}', e.performer, displayIdx]);
+      rows.add([
+        'ENTR',
+        'ID_${e.id}',
+        'ID_${e.sessionId}',
+        'ID_${e.librarySongId}',
+        e.performer,
+        displayIdx
+      ]);
       displayIdx++;
     }
 
@@ -257,7 +327,8 @@ class DataManagementViewModel extends _$DataManagementViewModel {
       );
       if (result == null || result.files.single.path == null) return false;
 
-      var content = await File(result.files.single.path!).readAsString(encoding: utf8);
+      var content =
+      await File(result.files.single.path!).readAsString(encoding: utf8);
       if (content.startsWith('\uFEFF')) content = content.substring(1);
 
       final rows = const CsvToListConverter().convert(content);
@@ -302,7 +373,8 @@ class DataManagementViewModel extends _$DataManagementViewModel {
                 sessionId: row[2].toString().replaceAll('ID_', ''),
                 librarySongId: row[3].toString().replaceAll('ID_', ''),
                 performer: drift.Value(row[4].toString()),
-                sortOrder: drift.Value((int.tryParse(row[5].toString()) ?? 1) - 1),
+                sortOrder: drift.Value(
+                    (int.tryParse(row[5].toString()) ?? 1) - 1),
               ));
             case 'PERF':
               await database.insertPerformer(PerformersCompanion.insert(
@@ -312,6 +384,9 @@ class DataManagementViewModel extends _$DataManagementViewModel {
           }
         }
       });
+
+      // CSV 가져오기 후 클라우드에도 반영
+      await SupabaseService.pushAllToCloud();
 
       ref.invalidate(libraryViewModelProvider);
       ref.invalidate(sessionViewModelProvider);
@@ -351,9 +426,11 @@ class SongRankingViewModel extends _$SongRankingViewModel {
         'total_count': 0,
         'my_count': 0,
       });
-      aggregation[key]!['total_count'] = (aggregation[key]!['total_count'] as int) + 1;
+      aggregation[key]!['total_count'] =
+          (aggregation[key]!['total_count'] as int) + 1;
       if (entry.performer.isEmpty) {
-        aggregation[key]!['my_count'] = (aggregation[key]!['my_count'] as int) + 1;
+        aggregation[key]!['my_count'] =
+            (aggregation[key]!['my_count'] as int) + 1;
       }
     }
 

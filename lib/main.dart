@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'database/database.dart';
 import 'viewmodels/ui_state.dart';
 import 'views/main_screen.dart';
@@ -8,10 +9,23 @@ import 'views/main_screen.dart';
 late AppDatabase database;
 late SharedPreferences prefs;
 
+// ▼▼▼ 본인의 Supabase 프로젝트 URL과 anon key로 교체하세요 ▼▼▼
+const _supabaseUrl = 'https://pxwgiaoycqbtzkbdhwec.supabase.co';
+const _supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB4d2dpYW95Y3FidHprYmRod2VjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYyMDYzMzUsImV4cCI6MjA5MTc4MjMzNX0.fkD-jHhwOr-iyz6NAPczz6vDg0VKvrwQvhdJbppcxoo';
+// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Supabase 초기화
+  await Supabase.initialize(
+    url: _supabaseUrl,
+    anonKey: _supabaseAnonKey,
+  );
+
   prefs = await SharedPreferences.getInstance();
   database = AppDatabase();
+
   runApp(const ProviderScope(child: MyApp()));
 }
 
