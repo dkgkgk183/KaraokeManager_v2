@@ -3,77 +3,452 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>뜌땨의 노래방 로그 매니저 v7.0</title>
+    <title>뜌땨의 노래방 로그 매니저</title>
     <style>
-        :root { --primary: #6200ea; --bg: #f3f4f6; --text: #333; --border: #e5e7eb; }
-        body { font-family: 'Pretendard', sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        
-        /* 탭 스타일 */
-        .tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        .tab-btn { padding: 10px 20px; border: none; background: none; cursor: pointer; font-weight: bold; font-size: 16px; color: #888; }
-        .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
-        
-        /* 테이블 스타일 */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; table-layout: fixed; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #eee; vertical-align: middle; word-break: break-all; }
-        th { background: #f9fafb; font-weight: 600; color: #555; }
-        .fav-row { background-color: #fff9c4 !important; }
-        
-        /* 링크 박스 */
-        .link-box { margin-bottom: 10px; display: flex; gap: 15px; font-size: 14px; }
-        .link-box a { text-decoration: none; color: var(--primary); font-weight: bold; display: flex; align-items: center; }
-        .link-box a:hover { text-decoration: underline; }
-        
-        /* 입력 폼 스타일 (Add Bar) */
-        .input-bar { background: #f8fafc; padding: 15px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 15px; display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
-        .input-group { display: flex; flex-direction: column; gap: 4px; }
-        .input-group label { font-size: 12px; font-weight: bold; color: #666; }
-        .input-group input, .input-group select { padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        
-        /* 버튼 */
-        .btn { padding: 8px 16px; border-radius: 6px; border: none; cursor: pointer; font-weight: 600; transition: 0.2s; white-space: nowrap; }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-danger { background: #ef4444; color: white; }
-        .btn-success { background: #10b981; color: white; }
-        .btn-secondary { background: #e5e7eb; color: #374151; }
-        .btn-icon { padding: 4px 8px; font-size: 14px; background: #eee; border-radius: 4px; cursor: pointer; border:none; }
-        .btn-icon:hover { background: #ddd; }
+        /* === Soft Gradient Design System === */
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap');
 
-        /* 체크박스 스타일 */
+        :root {
+            --bg-gradient-start: #0f0c29;
+            --bg-gradient-mid: #302b63;
+            --bg-gradient-end: #24243e;
+            --bg-surface: rgba(255, 255, 255, 0.04);
+            --bg-elevated: rgba(255, 255, 255, 0.07);
+            --bg-card: rgba(255, 255, 255, 0.1);
+            --text-primary: #e8e8f0;
+            --text-secondary: #a0a0b8;
+            --text-muted: #6e6e85;
+            --accent: #a78bfa;
+            --accent-light: #c4b5fd;
+            --accent-dark: #7c3aed;
+            --error-red: #f87171;
+            --warning-orange: #fbbf24;
+            --info-blue: #60a5fa;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --border-light: rgba(255, 255, 255, 0.15);
+            --shadow-soft: rgba(0, 0, 0, 0.2) 0px 4px 24px;
+            --shadow-medium: rgba(0, 0, 0, 0.3) 0px 8px 32px;
+            --font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+            --radius-pill: 9999px;
+            --radius-card: 12px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background:
+                radial-gradient(circle at 20% 30%, rgba(167, 139, 250, 0.08) 0%, transparent 50%),
+                radial-gradient(circle at 80% 70%, rgba(124, 58, 237, 0.06) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--bg-surface);
+            padding: 28px;
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-medium);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border-color);
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Typography */
+        h2, h3, h4 { font-weight: 700; }
+        h2 {
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, var(--accent-light), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        h3 { font-size: 18px; margin-bottom: 16px; }
+        h4 { font-size: 16px; color: var(--text-secondary); }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+        .tab-btn {
+            padding: 8px 20px;
+            border: none;
+            background: var(--bg-elevated);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            border-radius: var(--radius-pill);
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover { color: var(--text-primary); background: var(--bg-card); transform: translateY(-1px); }
+        .tab-btn.active {
+            color: white;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            font-weight: 700;
+            box-shadow: 0 2px 12px rgba(167, 139, 250, 0.3);
+        }
+
+        /* Tables */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+            table-layout: fixed;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+            word-break: break-all;
+        }
+        th {
+            background: var(--bg-elevated);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        tbody tr { transition: background 0.2s ease; }
+        tbody tr:hover { background: rgba(167, 139, 250, 0.06); }
+        .fav-row { background-color: rgba(167, 139, 250, 0.08) !important; }
+
+        /* Link Box */
+        .link-box {
+            margin-bottom: 10px;
+            display: flex;
+            gap: 20px;
+            font-size: 14px;
+        }
+        .link-box a {
+            text-decoration: none;
+            color: var(--accent);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.3s;
+        }
+        .link-box a:hover { color: var(--accent-light); text-decoration: underline; }
+
+        /* Input Bar */
+        .input-bar {
+            background: var(--bg-elevated);
+            padding: 16px;
+            border-radius: var(--radius-card);
+            border: 1px solid var(--border-color);
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+        }
+        .input-group { display: flex; flex-direction: column; gap: 6px; }
+        .input-group label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .input-group input,
+        .input-group select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: var(--font-family);
+            box-sizing: border-box;
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 8px 20px;
+            border-radius: var(--radius-pill);
+            border: none;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1.4px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-family: var(--font-family);
+        }
+        .btn:active { transform: scale(0.97); }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            box-shadow: 0 2px 12px rgba(167, 139, 250, 0.3);
+        }
+        .btn-primary:hover { box-shadow: 0 4px 20px rgba(167, 139, 250, 0.4); transform: translateY(-1px); }
+        .btn-danger {
+            background: var(--error-red);
+            color: white;
+        }
+        .btn-danger:hover { background: #ef4444; }
+        .btn-success {
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            color: white;
+            box-shadow: 0 2px 12px rgba(167, 139, 250, 0.3);
+        }
+        .btn-success:hover { box-shadow: 0 4px 20px rgba(167, 139, 250, 0.4); transform: translateY(-1px); }
+        .btn-secondary {
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+        .btn-secondary:hover { background: var(--bg-card); color: var(--text-primary); }
+        .btn-sm { padding: 6px 14px; font-size: 12px; }
+        .btn-icon {
+            padding: 4px 8px;
+            font-size: 14px;
+            background: var(--bg-card);
+            border-radius: 6px;
+            cursor: pointer;
+            border: none;
+            color: var(--text-primary);
+            transition: background 0.2s;
+        }
+        .btn-icon:hover { background: var(--border-light); }
+
+        /* Checkbox */
         .checkbox-wrapper { display: flex; align-items: center; height: 38px; }
-        .checkbox-wrapper input { width: 20px; height: 20px; cursor: pointer; }
+        .checkbox-wrapper input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
 
-        /* 별점 스타일 */
-        .star-control { display: flex; align-items: center; gap: 10px; margin: 15px 0; padding: 10px; background: #fffbeb; border-radius: 8px; border: 1px solid #fcd34d; }
-        .stars { font-size: 24px; color: #ddd; letter-spacing: 2px; }
-        .star-filled { color: #f59e0b; } /* 꽉 찬 별 */
-        .star-half { 
-            background: linear-gradient(to right, #f59e0b 50%, #ddd 50%); 
-            -webkit-background-clip: text; 
-            color: transparent; 
-        } /* 반쪽 별 */
+        /* Star Control */
+        .star-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 15px 0;
+            padding: 12px 16px;
+            background: var(--bg-elevated);
+            border-radius: var(--radius-card);
+            border: 1px solid var(--border-color);
+        }
+        .stars { font-size: 24px; color: var(--border-color); letter-spacing: 2px; }
+        .star-filled { color: var(--warning-orange); }
+        .star-half {
+            background: linear-gradient(to right, var(--warning-orange) 50%, var(--border-color) 50%);
+            -webkit-background-clip: text;
+            color: transparent;
+        }
 
-        /* 유틸리티 */
-        .hidden { display: none; }
-        .control-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .file-box { background: #e0e7ff; padding: 15px; border-radius: 8px; margin-bottom: 20px; text-align: center; }
-        
-        /* 모달 */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 20px; border-radius: 8px; width: 400px; max-height: 90vh; overflow-y: auto; }
+        /* Utilities */
+        .hidden { display: none !important; }
+        .control-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 10px;
+        }
+
+        /* File Box */
+        .file-box {
+            background: var(--bg-elevated);
+            padding: 20px;
+            border-radius: var(--radius-card);
+            margin-bottom: 20px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #statusMsg {
+            margin-top: 10px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            width: 100%;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s ease-out;
+        }
+        .modal-content {
+            background: var(--bg-gradient-end);
+            padding: 24px;
+            border-radius: var(--radius-card);
+            width: 420px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--shadow-medium);
+            border: 1px solid var(--border-color);
+            animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .modal-content h3 {
+            margin-bottom: 20px;
+            color: var(--text-primary);
+        }
+        .modal-content .input-group input,
+        .modal-content .input-group select {
+            width: 100%;
+        }
+        .modal-content .input-group { margin-bottom: 12px; }
+        .modal-content div[style*="text-align:right"] {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 20px;
+        }
+
+        /* Session List */
+        #sessionList {
+            list-style: none;
+            padding: 0 !important;
+            max-height: 600px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color) !important;
+            border-radius: var(--radius-card);
+            background: var(--bg-elevated);
+        }
+        #sessionList li {
+            padding: 12px 16px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-primary);
+            transition: background 0.2s;
+        }
+        #sessionList li:hover { background: var(--bg-card); }
+        #sessionList li strong { font-weight: 600; }
+        #sessionList li[style*="background: #e0e7ff"] {
+            background: rgba(167, 139, 250, 0.15) !important;
+            border-left: 3px solid var(--accent);
+        }
+
+        /* Singer Table */
+        #singerTable th, #singerTable td { width: 50%; }
+
+        /* Date Input - White Calendar Icon */
+        .date-input-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+        .date-input-wrapper input[type="date"] {
+            color-scheme: dark;
+            background: rgba(0, 0, 0, 0.2);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px;
+            padding-right: 32px;
+            font-size: 14px;
+            font-family: var(--font-family);
+            transition: border-color 0.3s, box-shadow 0.3s;
+        }
+        .date-input-wrapper input[type="date"]:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.15);
+        }
+        .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator {
+            background: transparent url("data:image/svg+xml;charset=utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='white' d='M11 2V0H9v2H7V0H5v2H3a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2h-2zm0 2h2v2H3V4h2V2H5v2h2V2h2v2h2zm0 4v2H5V8h6zm0 3v2H5v-2h6z'/%3E%3C/svg%3E") no-repeat center;
+            cursor: pointer;
+            opacity: 0.9;
+            width: 16px;
+            height: 16px;
+        }
+        .date-input-wrapper input[type="date"]::-webkit-calendar-picker-indicator:hover {
+            opacity: 1;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container { padding: 16px; }
+            .input-bar { flex-direction: column; align-items: stretch; }
+            .input-group { width: 100% !important; flex: unset !important; }
+            .tabs { flex-wrap: wrap; }
+            .tab-btn { font-size: 12px; padding: 6px 12px; }
+            .control-panel { flex-direction: column; align-items: flex-start; }
+            #sessionDetailPanel { width: 100% !important; }
+            div[style*="display: flex; gap: 20px;"] { flex-direction: column; }
+            div[style*="display: flex; gap: 20px;"] > div { width: 100% !important; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2 style="text-align:center;">🎧 뜌땨의 노래방 로그 매니저 v7.0</h2>
-    
+    <h2>🎧 뜌땨의 노래방 로그 매니저</h2>
+
     <div class="file-box">
         <input type="file" id="csvFileInput" accept=".csv" style="display:none">
         <button class="btn btn-primary" onclick="document.getElementById('csvFileInput').click()">📂 CSV 파일 불러오기</button>
         <button class="btn btn-success" onclick="downloadCSV()">💾 변경사항 저장하기 (CSV)</button>
-        <p id="statusMsg" style="margin-top:10px; font-size:14px; color:#666;">파일을 먼저 불러와, 뜌땨.</p>
+        <p id="statusMsg" style="margin-top:10px; font-size:14px; color:var(--text-secondary); width:100%;">파일을 먼저 불러와, 뜌땨.</p>
     </div>
 
     <div class="tabs">
@@ -126,9 +501,9 @@
         </div>
 
         <div class="control-panel">
-            <div style="font-size: 14px; color: #666;" id="songCount">총 0곡</div>
+            <div style="font-size: 14px; color: var(--text-secondary);" id="songCount">총 0곡</div>
             <div style="display:flex; gap:5px;">
-                <input type="text" id="searchInput" placeholder="제목/가수 검색..." onkeyup="renderLibrary()" style="width: 250px;">
+                <input type="text" id="searchInput" placeholder="제목/가수 검색..." onkeyup="renderLibrary()" style="width: 250px; background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 9999px; padding: 8px 16px; font-size: 14px;">
             </div>
         </div>
         <div style="overflow-x:auto;">
@@ -144,27 +519,29 @@
     </div>
 
     <div id="tab-sessions" class="hidden">
-        <div class="control-panel" style="justify-content: start; gap: 10px;">
-            <label style="font-weight: bold;">새 세션 날짜:</label>
-            <input type="date" id="newSessionDate" style="width: auto;">
+        <div class="control-panel" style="justify-content: flex-start; gap: 10px; flex-wrap: wrap;">
+            <label style="font-weight: 600; font-size: 14px; color: var(--text-secondary);">새 세션 날짜:</label>
+            <div class="date-input-wrapper">
+                <input type="date" id="newSessionDate">
+            </div>
             <button class="btn btn-primary" onclick="createNewSession()">+ 날짜로 세션 생성</button>
         </div>
-        <div style="display: flex; gap: 20px;">
-            <div style="width: 30%;">
+        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div style="width: 30%; min-width: 200px;">
                 <h4>📅 날짜 목록</h4>
-                <ul id="sessionList" style="list-style: none; padding: 0; max-height: 600px; overflow-y: auto; border: 1px solid #eee; border-radius: 8px;"></ul>
+                <ul id="sessionList" style="list-style: none; padding: 0; max-height: 600px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;"></ul>
             </div>
-            <div style="width: 70%;" id="sessionDetailPanel" class="hidden">
+            <div style="width: 70%; min-width: 300px;" id="sessionDetailPanel" class="hidden">
                 <h4 id="currentSessionTitle">상세 정보</h4>
-                
+
                 <div class="star-control">
-                    <label style="font-weight:bold; font-size:14px;">세션 평가:</label>
-                    <input type="range" id="sessionScoreInput" min="0" max="10" step="1" value="0" style="width:150px;" oninput="updateSessionScore(this.value)">
+                    <label style="font-weight:600; font-size:14px; color: var(--text-secondary);">세션 평가:</label>
+                    <input type="range" id="sessionScoreInput" min="0" max="10" step="1" value="0" style="width:150px; accent-color: var(--accent);" oninput="updateSessionScore(this.value)">
                     <span id="starDisplay" class="stars">☆☆☆☆☆</span>
-                    <span id="scoreText" style="font-weight:bold; color:#666; font-size:14px;">(0점)</span>
+                    <span id="scoreText" style="font-weight:600; color: var(--text-secondary); font-size:14px;">(0점)</span>
                 </div>
 
-                <div style="margin-bottom: 10px; display:flex; gap:10px;">
+                <div style="margin-bottom: 10px; display:flex; gap:10px; flex-wrap: wrap;">
                     <button class="btn btn-primary" onclick="openAddSongToSessionModal()">+ 이 날 부른 노래 추가</button>
                     <button class="btn btn-danger" onclick="deleteCurrentSession()">🗑️ 이 세션 삭제</button>
                 </div>
@@ -182,8 +559,8 @@
 
     <div id="tab-singers" class="hidden">
         <div class="control-panel">
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="newSingerName" placeholder="새 멤버 이름" style="width: 200px;">
+            <div style="display:flex; gap:10px; flex-wrap: wrap;">
+                <input type="text" id="newSingerName" placeholder="새 멤버 이름" style="width: 200px; background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; font-size: 14px;">
                 <button class="btn btn-primary" onclick="addSinger()">추가</button>
             </div>
         </div>
@@ -198,14 +575,14 @@
     <div class="modal-content">
         <h3>노래 정보 수정</h3>
         <input type="hidden" id="editSongId">
-        <div class="input-group" style="margin-bottom:10px"><label>제목</label><input type="text" id="edit_title"></div>
-        <div class="input-group" style="margin-bottom:10px"><label>가수</label><input type="text" id="edit_artist"></div>
-        <div class="input-group" style="margin-bottom:10px"><label>번호</label><input type="text" id="edit_number"></div>
-        <div class="input-group" style="margin-bottom:10px">
+        <div class="input-group"><label>제목</label><input type="text" id="edit_title"></div>
+        <div class="input-group"><label>가수</label><input type="text" id="edit_artist"></div>
+        <div class="input-group"><label>번호</label><input type="text" id="edit_number"></div>
+        <div class="input-group">
             <label>반주기</label>
             <select id="edit_brand"><option value="TJ">TJ</option><option value="KY">KY</option></select>
         </div>
-        <div class="input-group" style="margin-bottom:10px">
+        <div class="input-group">
             <label>최고음</label>
             <select id="edit_pitch">
                 <option value="~2옥타브 솔#">~2옥타브 솔#</option>
@@ -213,7 +590,7 @@
                 <option value="3옥타브 도~">3옥타브 도~</option>
             </select>
         </div>
-        <div class="input-group" style="margin-bottom:10px">
+        <div class="input-group">
             <label>즐겨찾기</label>
             <select id="edit_fav"><option value="0">일반</option><option value="1">★ 즐겨찾기</option></select>
         </div>
@@ -227,8 +604,8 @@
 <div id="sessionAddModal" class="modal">
     <div class="modal-content">
         <h3>세션에 노래 추가</h3>
-        <input type="text" id="sessSearch" placeholder="노래 검색..." onkeyup="renderSessionAddList()" style="margin-bottom:10px; width:100%;">
-        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #eee;">
+        <input type="text" id="sessSearch" placeholder="노래 검색..." onkeyup="renderSessionAddList()" style="margin-bottom:10px; width:100%; background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 8px 12px; font-size: 14px;">
+        <div style="max-height: 300px; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 8px;">
             <table id="sessAddListTable"><tbody></tbody></table>
         </div>
         <div style="text-align:right; margin-top:10px;">
@@ -256,7 +633,7 @@
             parseCSV(text);
             document.getElementById('statusMsg').innerText = `✅ 로드 완료! 노래: ${songs.length}곡, 세션: ${sessions.length}개`;
             renderLibrary(); renderSingers(); renderSessionList();
-            document.getElementById('csvFileInput').value = ''; 
+            document.getElementById('csvFileInput').value = '';
         };
         reader.readAsText(file, 'UTF-8');
     });
@@ -288,12 +665,11 @@
             if (row.length < 2) return;
             const obj = {
                 id: row[1], type: row[0],
-                d1: row[2] || '', d2: row[3] || '', d3: row[4] || '', 
+                d1: row[2] || '', d2: row[3] || '', d3: row[4] || '',
                 d4: row[5] || '', d5: row[6] || '', d6: row[7] || ''
             };
             if (obj.type === 'SONG') songs.push(obj);
             else if (obj.type === 'SESS') {
-                // SESS d3 = 별점 (없으면 0 처리)
                 if(!obj.d3) obj.d3 = '0';
                 sessions.push(obj);
             }
@@ -305,7 +681,7 @@
     function generateCSV() {
         if(!headerRow.length) headerRow = ["#TYPE", "ID(수정금지)", "DATA1", "DATA2", "DATA3", "DATA4", "DATA5", "DATA6"];
         let csvContent = headerRow.join(',') + '\r\n';
-        
+
         const formatRow = (type, id, d1, d2, d3, d4, d5, d6) => {
             const cols = [type, id, d1, d2, d3, d4, d5, d6].map(val => {
                 const s = String(val ?? '');
@@ -331,8 +707,7 @@
         if (songs.length === 0 && sessions.length === 0) { alert('데이터가 없어, 뜌땨!'); return; }
         const csvContent = generateCSV();
         const blob = new Blob([new Uint8Array([0xEF, 0xBB, 0xBF]), csvContent], { type: 'text/csv;charset=utf-8;' });
-        
-        // 날짜 기반 파일명 생성
+
         const now = new Date();
         const yy = String(now.getFullYear()).slice(-2);
         const mm = String(now.getMonth() + 1).padStart(2, '0');
@@ -360,36 +735,35 @@
         if (tabName === 'singers') renderSingers();
     }
 
-    // --- 색상 및 스타일 헬퍼 ---
+    // --- Color helpers (dark-theme adjusted) ---
     function getColorForPitch(pitch) {
-        if (pitch.includes('~2옥타브 솔#')) return '#2e7d32'; // 초록
-        if (pitch.includes('2옥타브 라~시')) return '#1565c0'; // 파랑
-        if (pitch.includes('3옥타브 도~')) return '#d32f2f'; // 빨강
-        return '#333';
+        if (pitch.includes('~2옥타브 솔#')) return '#4caf50'; // lighter green
+        if (pitch.includes('2옥타브 라~시')) return '#42a5f5'; // lighter blue
+        if (pitch.includes('3옥타브 도~')) return '#ef5350'; // lighter red
+        return '#ffffff';
     }
     function getColorForBrand(brand) {
-        if (brand === 'TJ') return '#6a1b9a'; // 보라
-        if (brand === 'KY') return '#ef6c00'; // 주황
-        return '#333';
+        if (brand === 'TJ') return '#ce93d8'; // light purple
+        if (brand === 'KY') return '#ffa726'; // orange
+        return '#ffffff';
     }
 
-    // --- 노래 라이브러리 ---
+    // --- Library ---
     function renderLibrary() {
         const tbody = document.querySelector('#libraryTable tbody');
         tbody.innerHTML = '';
         const keyword = document.getElementById('searchInput').value.toLowerCase();
         let displaySongs = [...songs];
-        
-        // 정렬: 영문/특수문자 -> 한글 순서 (기본 localeCompare 동작)
+
         displaySongs.sort((a, b) => a.d1.localeCompare(b.d1));
-        
+
         let count = 0;
         displaySongs.forEach(s => {
             if (s.d1.toLowerCase().includes(keyword) || s.d2.toLowerCase().includes(keyword)) {
                 count++;
                 const tr = document.createElement('tr');
                 if (s.d6 == '1') tr.classList.add('fav-row');
-                
+
                 const brandColor = getColorForBrand(s.d4);
                 const pitchColor = getColorForPitch(s.d5);
 
@@ -399,7 +773,7 @@
                     <td>${s.d3}</td>
                     <td style="color:${brandColor}; font-weight:bold;">${s.d4}</td>
                     <td style="color:${pitchColor}; font-weight:bold;">${s.d5}</td>
-                    <td style="color:${s.d6 == '1' ? '#f59e0b' : '#ddd'}; font-size:1.2em;">${s.d6 == '1' ? '★' : '☆'}</td>
+                    <td style="color:${s.d6 == '1' ? '#f59e0b' : 'var(--border-color)'}; font-size:1.2em;">${s.d6 == '1' ? '★' : '☆'}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm" onclick="openEditSongModal('${s.id}')">수정</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteSong('${s.id}')">삭제</button>
@@ -415,7 +789,6 @@
         const title = document.getElementById('add_title').value;
         const artist = document.getElementById('add_artist').value;
         if (!title || !artist) { alert('제목과 가수는 필수야, 뜌땨!'); return; }
-        
         const newSong = {
             id: generateID('ID'), type: 'SONG',
             d1: title, d2: artist,
@@ -465,7 +838,7 @@
         renderLibrary();
     }
 
-    // --- 세션 관리 ---
+    // --- Sessions ---
     let currentSessionId = null;
 
     function renderSessionList() {
@@ -473,14 +846,12 @@
         ul.innerHTML = '';
         sessions.sort((a,b) => b.d1.localeCompare(a.d1)).forEach(sess => {
             const li = document.createElement('li');
-            li.style.padding = '12px';
-            li.style.cursor = 'pointer';
-            li.style.borderBottom = '1px solid #eee';
             const dateOnly = sess.d1.split(' ')[0];
             li.innerHTML = `<strong>${dateOnly}</strong>`;
             li.onclick = () => {
-                Array.from(ul.children).forEach(c => c.style.background = 'white');
-                li.style.background = '#e0e7ff';
+                Array.from(ul.children).forEach(c => c.style.background = '');
+                li.style.background = 'rgba(167, 139, 250, 0.15)';
+                li.style.borderLeft = '3px solid var(--accent)';
                 loadSessionDetail(sess.id);
             };
             ul.appendChild(li);
@@ -503,36 +874,30 @@
         document.getElementById('sessionDetailPanel').classList.remove('hidden');
         const sess = sessions.find(s => s.id === sessId);
         document.getElementById('currentSessionTitle').innerText = `📅 ${sess.d1.split(' ')[0]} 세션 상세`;
-        
-        // 별점 로드 (d3)
+
         const score = sess.d3 ? parseInt(sess.d3) : 0;
         document.getElementById('sessionScoreInput').value = score;
-        updateSessionScore(score); // UI 업데이트
+        updateSessionScore(score);
 
         renderSessionSongs();
     }
 
     function updateSessionScore(val) {
-        // UI 업데이트
         const score = parseInt(val);
         document.getElementById('scoreText').innerText = `(${score}점)`;
-        
-        // 별 그리기 로직 (1점 = 반개)
-        // score 0 ~ 10.
-        // ex) score 3 -> 1.5 stars -> Full, Half, Empty, Empty, Empty
+
         let html = '';
         for(let i=1; i<=5; i++) {
             if (score >= i * 2) {
-                html += '<span class="star-filled">★</span>'; // 꽉 찬 별
+                html += '<span class="star-filled">★</span>';
             } else if (score >= i * 2 - 1) {
-                html += '<span class="star-half">★</span>'; // 반쪽 별
+                html += '<span class="star-half">★</span>';
             } else {
-                html += '☆'; // 빈 별
+                html += '☆';
             }
         }
         document.getElementById('starDisplay').innerHTML = html;
 
-        // 데이터 저장
         const sess = sessions.find(s => s.id === currentSessionId);
         if (sess) sess.d3 = String(score);
     }
@@ -549,7 +914,7 @@
         currentEntries.forEach((entry, idx) => {
             const song = songs.find(s => s.id === entry.d2) || { d1: '(삭제된 노래)', d2: '-' };
             const currentSinger = entry.d3 || '';
-            entry.d4 = idx + 1; 
+            entry.d4 = idx + 1;
 
             const tr = document.createElement('tr');
             tr.innerHTML = `
@@ -561,7 +926,7 @@
                 <td>${song.d1}</td>
                 <td>${song.d2}</td>
                 <td>
-                    <select onchange="updateEntrySinger('${entry.id}', this.value)" style="width:100%">
+                    <select onchange="updateEntrySinger('${entry.id}', this.value)" style="width:100%; background: rgba(0,0,0,0.2); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 6px; padding: 4px 8px;">
                         ${singerOptions}
                     </select>
                 </td>
@@ -578,7 +943,7 @@
         const currentIndex = currentEntries.findIndex(e => e.id === entryId);
         if (currentIndex === -1) return;
         const targetIndex = currentIndex + direction;
-        if (targetIndex < 0 || targetIndex >= currentEntries.length) return; 
+        if (targetIndex < 0 || targetIndex >= currentEntries.length) return;
 
         const tempOrder = currentEntries[currentIndex].d4;
         currentEntries[currentIndex].d4 = currentEntries[targetIndex].d4;
@@ -596,14 +961,14 @@
         const tbody = document.querySelector('#sessAddListTable tbody');
         tbody.innerHTML = '';
         const keyword = document.getElementById('sessSearch').value.toLowerCase();
-        
+
         songs.forEach(s => {
             if (s.d1.toLowerCase().includes(keyword) || s.d2.toLowerCase().includes(keyword)) {
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td style="padding:8px;">
                         <div style="font-weight:bold;">${s.d1}</div>
-                        <div style="font-size:12px; color:#666;">${s.d2}</div>
+                        <div style="font-size:12px; color:var(--text-secondary);">${s.d2}</div>
                     </td>
                     <td style="text-align:right;">
                         <button class="btn btn-primary btn-sm" onclick="addSongToSession('${s.id}')">추가</button>
@@ -644,7 +1009,7 @@
         renderSessionList();
     }
 
-    // --- 가수 관리 ---
+    // --- Singers ---
     function renderSingers() {
         const tbody = document.querySelector('#singerTable tbody');
         tbody.innerHTML = '';
